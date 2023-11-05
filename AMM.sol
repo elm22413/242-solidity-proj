@@ -17,6 +17,11 @@ contract Exchange {
     event LiquidityProvided(address indexed provider, uint amountERC20Token, uint amountEth, uint liquidityPositionsIssued);
     event LiquidityWithdrawn(address indexed provider, uint amountERC20Token, uint amountEth, uint liquidityPositionsBurned);
 
+    event SwapForEth(uint amountERC20TokenDeposited, uint amountEthWithdrew);
+    event SwapForERC20Token(uint amountERC20TokenWithdrew, uint amountEthDeposited);
+
+
+
     constructor(address _erc20TokenAddress) {
         owner = msg.sender;
         erc20TokenAddress = _erc20TokenAddress;
