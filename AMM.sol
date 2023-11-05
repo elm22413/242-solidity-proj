@@ -22,6 +22,7 @@ contract Exchange {
         erc20TokenAddress = _erc20TokenAddress;
     }
 
+
     function provideLiquidity(uint _amountERC20Token) external returns (uint) {
 
         //connect to the Token interface based on the address
@@ -103,4 +104,148 @@ contract Exchange {
         //return the amount of eth and token sent to the user
         return (amountERC20ToSend, amountEthToSend);
     }
+
+    //function to estimate the eth to provide based on the token amount
+    function estimateEthToProvide(uint _amountERC20Token) external view returns (uint) {
+        
+        //connect to the token interface with the address from above
+        IERC20 erc20Token = IERC20(erc20TokenAddress);
+
+        //get the eth balence of the contract
+        uint256 contractEthBalance = address(this).balance;
+
+        //get the token balence of this contract from the token interface
+        uint256 contractERC20TokenBalance = erc20Token.balanceOf(address(this));
+
+        //return the amount of eth to send
+        return (contractEthBalance * _amountERC20Token) / contractERC20TokenBalance;
+    }
+
+    //function to estimate the token to provide based on the eth amount
+    //users will use this to find out how much ERC-20 token to deposit if they want to deposit an amount of ETh
+    function estimateERC20TokenToProvide(uint _amountEth) external view returns (uint) {
+        
+        //connect to the token interface with the address from above
+        IERC20 erc20Token = IERC20(erc20TokenAddress);
+
+        //get the eth balence of the contract
+        uint256 contractEthBalance = address(this).balance;
+
+        //get the token balence of this contract from the token interface
+        uint256 contractERC20TokenBalance = erc20Token.balanceOf(address(this));
+
+        //return the amount of eth to send
+        return (contractERC20TokenBalance * _amountEth) / contractEthBalance;
+    }
+
+
+    //fucntion to estimate the amount of eth to give the caller based on the amount of ERC20 token caller wishes to swap for when a user wants to know how much ether to expect when calling swapForEth
+    function estimateSwapForEth(uint _amountERC20Token) external view returns (uint) {
+        //connect to the token interface with the address from above
+        IERC20 erc20Token = IERC20(erc20TokenAddress);
+
+        //get the eth balence of the contract
+        uint256 contractEthBalance = address(this).balance;
+
+        //get the token balence of this contract from the token interface
+        uint256 contractERC20TokenBalance = erc20Token.balanceOf(address(this));
+
+        //get the contract token balance after the swap
+        uint256 contractERC20TokenBalanceAfterSwap = contractERC20TokenBalance + _amountERC20Token;
+
+        //get the contract eth balance after the swap
+        uint256 contractEthBalanceAfterSwap = k / contractERC20TokenBalanceAfterSwap;
+
+        //return the amount of eth to send
+        return contractEthBalance - contractEthBalanceAfterSwap;
+       
+    }
+
+    //fucntion to return amount of eth sent when caller deposits some ERC20 token in return for eth
+    function swapForEth(uint _amountERC20Token) external returns (uint) {
+        //connect to the token interface with the address from above
+        IERC20 erc20Token = IERC20(erc20TokenAddress);
+
+        //get the eth balence of the contract
+        uint256 contractEthBalance = address(this).balance;
+
+        //get the token balence of this contract from the token interface
+        uint256 contractERC20TokenBalance = erc20Token.balanceOf(address(this));
+
+        //get the contract token balance after the swap
+        uint256 contractERC20TokenBalanceAfterSwap = contractERC20TokenBalance + _amountERC20Token;
+
+        //get the contract eth balance after the swap
+        uint256 contractEthBalanceAfterSwap = k / contractERC20TokenBalanceAfterSwap;
+
+        //get the amount of eth to send to the caller
+        uint256 amountEthToSend = contractEthBalance - contractEthBalanceAfterSwap;
+
+        //transfer the tokens from the caller to the contract
+        erc20Token.transferFrom(msg.sender, address(this), _amountERC20Token);
+
+        //transfer the eth to the caller
+        payable(msg.sender).transfer(amountEthToSend);
+
+        //return the amount of eth sent to the caller
+        return amountEthToSend;
+    }
+
+    //function for when caller wants to know how much ERC20 token to expect when calling swapForERC20Token
+    function estimateSwapForERC20Token(uint _amountEth) external view returns (uint) {
+        //connect to the token interface with the address from above
+        IERC20 erc20Token = IERC20(erc20TokenAddress);
+
+        //get the eth balence of the contract
+        uint256 contractEthBalance = address(this).balance;
+
+        //get the token balence of this contract from the token interface
+        uint256 contractERC20TokenBalance = erc20Token.balanceOf(address(this));
+
+        //get the contract eth balance after the swap
+        uint256 contractEthBalanceAfterSwap = contractEthBalance + _amountEth;
+
+        //get the contract token balance after the swap
+        uint256 contractERC20TokenBalanceAfterSwap = k / contractEthBalanceAfterSwap;
+
+        //return the amount of eth to send
+        return contractERC20TokenBalance - contractERC20TokenBalanceAfterSwap;
+    }
+
+    //function to return amount of ERC20 token sent when caller deposits some ETH in return for ERC20 token
+    function swapForERC20Token(uint _amountEth) external returns (uint) {
+        //connect to the token interface with the address from above
+        IERC20 erc20Token = IERC20(erc20TokenAddress);
+
+        //get the eth balence of the contract
+        uint256 contractEthBalance = address(this).balance;
+
+        //get the token balence of this contract from the token interface
+        uint256 contractERC20TokenBalance = erc20Token.balanceOf(address(this));
+
+        //get the contract eth balance after the swap
+        uint256 contractEthBalanceAfterSwap = contractEthBalance + _amountEth;
+
+        //get the contract token balance after the swap
+        uint256 contractERC20TokenBalanceAfterSwap = k / contractEthBalanceAfterSwap;
+
+        //get the amount of ERC20 token to send to the caller
+        uint256 amountERC20TokenToSend = contractERC20TokenBalance - contractERC20TokenBalanceAfterSwap;
+
+        //transfer the eth from the caller to the contract
+        payable(address(this)).transfer(_amountEth);
+
+        //transfer the ERC20 token to the caller
+        erc20Token.transfer(msg.sender, amountERC20TokenToSend);
+
+        //return the amount of ERC20 token sent to the caller
+        return amountERC20TokenToSend;
+    }
+
+
+
+
+
+
+
 }
