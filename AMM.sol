@@ -8,7 +8,7 @@ contract Exchange {
     address public erc20TokenAddress;
     uint256 public totalLiquidityPositions;
     //constant of k gets updated based on 
-    uint256 public constant k;
+    uint256 public k=0;
 
     //local storage of the amount of liquidty a user has
     mapping(address => uint256) public liquidityPositions;
@@ -28,7 +28,7 @@ contract Exchange {
     }
 
 
-    function provideLiquidity(uint _amountERC20Token) external returns (uint) {
+    function provideLiquidity(uint _amountERC20Token) external payable returns (uint) {
 
         //connect to the Token interface based on the address
         IERC20 erc20Token = IERC20(erc20TokenAddress);
